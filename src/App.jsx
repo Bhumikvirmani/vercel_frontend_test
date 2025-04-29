@@ -3,6 +3,8 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 
+const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080'
+
 function App() {
   const [count, setCount] = useState(0)
   const [name, setName] = useState('')
@@ -19,7 +21,7 @@ function App() {
     setResponseMessage('')
     setErrorMessage('')
     try {
-      const response = await fetch('http://localhost:5000/', {
+      const response = await fetch(`${backendUrl}/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -44,7 +46,7 @@ function App() {
   const handleGetRequest = async () => {
     setGetResponse('')
     try {
-      const response = await fetch('http://localhost:5000/')
+      const response = await fetch(`${backendUrl}/`)
       if (response.ok) {
         const text = await response.text()
         setGetResponse(text)
@@ -121,4 +123,4 @@ function App() {
   )
 }
 
-export default App
+export default App;
