@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 
+// Use environment variable with fallback to localhost
 const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080'
 
 function App() {
@@ -48,15 +49,20 @@ function App() {
     try {
       const response = await fetch(`${backendUrl}/`)
       if (response.ok) {
-        const text = await response.text()
-        setGetResponse(text)
+        const data = await response.json()
+        setGetResponse(JSON.stringify(data, null, 2))
       } else {
-        setGetResponse('Failed to fetch')
+        setGetResponse('Failed to fetch: ' + response.status)
       }
     } catch (error) {
       setGetResponse('Error: ' + error.message)
     }
   }
+
+  // Check backend connection on component mount
+  useEffect(() => {
+    handleGetRequest()
+  }, [])
 
   return (
     <>
@@ -116,9 +122,20 @@ function App() {
       {responseMessage && <p style={{ color: 'green' }}>{responseMessage}</p>}
       {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
 
-      <h2>Test Backend GET</h2>
-      <button onClick={handleGetRequest}>Test GET /</button>
-      {getResponse && <p>{getResponse}</p>}
+      <h2>Backend Connection Status</h2>
+      <button onClick={handleGetRequest}>Refresh Connection Status</button>
+      {getResponse && (
+        <pre style={{
+          textAlign: 'left',
+          background: '#f0f0f0',
+          padding: '10px',
+          borderRadius: '5px',
+          maxWidth: '400px',
+          margin: '10px auto'
+        }}>
+          {getResponse}
+        </pre>
+      )}
     </>
   )
 }
