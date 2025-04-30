@@ -3,11 +3,10 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 
-// Use environment variable with fallback to localhost
-const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080'
+// Use environment variable with fallback to the deployed backend
+const backendUrl = import.meta.env.VITE_BACKEND_URL || 'https://test-backend-deploy-homh.onrender.com'
 
 function App() {
-  const [count, setCount] = useState(0)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [message, setMessage] = useState('')
@@ -26,17 +25,27 @@ function App() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
         body: JSON.stringify({ name, email, message }),
       })
+
       if (response.ok) {
-        const data = await response.json()
-        setResponseMessage(data.message)
-        setName('')
-        setEmail('')
-        setMessage('')
+        try {
+          const data = await response.json()
+          setResponseMessage(data.message || 'Data submitted successfully')
+          setName('')
+          setEmail('')
+          setMessage('')
+        } catch (jsonError) {
+          // If JSON parsing fails, still consider it a success
+          setResponseMessage('Data submitted successfully')
+          setName('')
+          setEmail('')
+          setMessage('')
+        }
       } else {
-        setErrorMessage('Failed to send data')
+        setErrorMessage(`Failed to send data: ${response.status} ${response.statusText}`)
       }
     } catch (error) {
       setErrorMessage('Error: ' + error.message)
@@ -47,10 +56,26 @@ function App() {
   const handleGetRequest = async () => {
     setGetResponse('')
     try {
-      const response = await fetch(`${backendUrl}/`)
+      // Add credentials and headers to the fetch request
+      const response = await fetch(`${backendUrl}/`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        // Don't use 'no-cors' mode as it will make the response opaque
+        // and you won't be able to read the response body
+      })
+
       if (response.ok) {
-        const data = await response.json()
-        setGetResponse(JSON.stringify(data, null, 2))
+        try {
+          const data = await response.json()
+          setGetResponse(JSON.stringify(data, null, 2))
+        } catch (jsonError) {
+          // If JSON parsing fails, try to get text
+          const text = await response.text()
+          setGetResponse(text)
+        }
       } else {
         setGetResponse('Failed to fetch: ' + response.status)
       }
@@ -66,23 +91,6 @@ function App() {
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
 
       <h2>Contact Form</h2>
       <form onSubmit={handleSubmit}>
