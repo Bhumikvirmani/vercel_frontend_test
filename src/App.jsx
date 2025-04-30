@@ -4,7 +4,7 @@ import viteLogo from '/vite.svg'
 import './App.css'
 
 // Use environment variable with fallback to the deployed backend
-const backendUrl = import.meta.env.VITE_BACKEND_URL || 'https://test-backend-deploy-homh.onrender.com'
+const backendUrl = import.meta.env.VITE_BACKEND_URL || 'https://test-backend-deploy-rpsq.onrender.com'
 
 function App() {
   const [name, setName] = useState('')
